@@ -47,6 +47,8 @@ export const articles = mysqlTable("articles", {
   id: int("id").autoincrement().primaryKey(),
   sourceId: int("sourceId").notNull(),
   userId: int("userId").notNull(), // 冗余字段，便于查询
+  parentArticleId: int("parentArticleId"), // 父文章ID，用于多篇内容关联
+  pageType: mysqlEnum("pageType", ["article", "list", "unknown"]).default("article"), // 页面类型
   title: varchar("title", { length: 500 }).notNull(),
   author: varchar("author", { length: 255 }),
   originalUrl: text("originalUrl").notNull(),

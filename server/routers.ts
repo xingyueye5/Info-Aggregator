@@ -28,6 +28,8 @@ import {
   createOrUpdateSettings,
 } from "./db";
 import { crawlSource, crawlAllActiveSources } from "./crawler";
+import { crawlSourceSmart } from "./crawlerIntegration";
+import { generateExternalSummary } from "./externalAI";
 import { notifyOwner } from "./_core/notification";
 
 export const appRouter = router({
@@ -111,7 +113,8 @@ export const appRouter = router({
           throw new Error('Source not found or unauthorized');
         }
         
-        const result = await crawlSource(input.id);
+        // 使用智能爬虫
+        const result = await crawlSourceSmart(input.id);
         
         // 发送通知
         const settings = await getSettingsByUserId(ctx.user.id);
@@ -223,6 +226,31 @@ export const appRouter = router({
         
         await updateArticle(input.id, { isFavorite: !article.isFavorite });
         return { success: true, isFavorite: !article.isFavorite };
+      }),
+    
+    generateExternalSummary: protectedProcedure
+      .input(z.object({
+        id: z.number(),
+        apiUrl: z.string().url(),
+        apiKey: z.string(),
+        translateToChinese: z.boolean().default(true),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        const article = await getArticleById(input.id);
+        if (!article || article.userId !== ctx.user.id) {
+          throw new Error('Article not found or unauthorized');
+        }
+        
+        const result = await generateExternalSummary(
+          article.contentText,
+          {
+            apiUrl: input.apiUrl,
+            apiKey: input.apiKey,
+          },
+          input.translateToChinese
+        );
+        
+        return result;
       }),
     
     export: protectedProcedure

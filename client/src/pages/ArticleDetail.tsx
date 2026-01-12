@@ -6,6 +6,10 @@ import { ArrowLeft, Download, ExternalLink, Heart, Loader2, Sparkles } from "luc
 import { useParams, useLocation } from "wouter";
 import { toast } from "sonner";
 import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
 
 export default function ArticleDetail() {
   const params = useParams();
@@ -45,6 +49,31 @@ export default function ArticleDetail() {
   });
 
   const [exportFormat, setExportFormat] = useState<'markdown' | 'txt'>('markdown');
+  const [externalSummary, setExternalSummary] = useState<string>('');
+  const [showExternalDialog, setShowExternalDialog] = useState(false);
+  const [externalApiUrl, setExternalApiUrl] = useState('https://pmpjfbhq.cn-nb1.rainapp.top/v1');
+  const [externalApiKey, setExternalApiKey] = useState('sk-qNbdjNke4CdwOBIqJj4O4RoAdoItV2OJGii8lLA6j6B8lDT1');
+  const [translateToChinese, setTranslateToChinese] = useState(true);
+  
+  const externalSummaryMutation = trpc.articles.generateExternalSummary.useMutation({
+    onSuccess: (data) => {
+      setExternalSummary(data.summary);
+      toast.success('外部AI总结生成成功');
+      setShowExternalDialog(false);
+    },
+    onError: (error) => {
+      toast.error(`生成失败: ${error.message}`);
+    },
+  });
+  
+  const handleGenerateExternalSummary = () => {
+    externalSummaryMutation.mutate({
+      id: articleId,
+      apiUrl: externalApiUrl,
+      apiKey: externalApiKey,
+      translateToChinese,
+    });
+  };
 
   const handleMarkAsRead = () => {
     updateStatusMutation.mutate({ id: articleId, status: 'read' });
@@ -112,7 +141,7 @@ export default function ArticleDetail() {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             {article.status === 'unread' && (
               <Button onClick={handleMarkAsRead} disabled={updateStatusMutation.isPending}>
                 标记为已读
@@ -132,10 +161,85 @@ export default function ArticleDetail() {
             </Button>
             <Button variant="outline" onClick={() => handleExport('txt')}>
               <Download className="w-4 h-4 mr-2" />
-              导出 TXT
+              导出TXT
             </Button>
+            
+            <Dialog open={showExternalDialog} onOpenChange={setShowExternalDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  外部AI总结
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>生成外部AI总结</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="apiUrl">API URL</Label>
+                    <Input
+                      id="apiUrl"
+                      value={externalApiUrl}
+                      onChange={(e) => setExternalApiUrl(e.target.value)}
+                      placeholder="https://api.example.com/v1"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="apiKey">API Key</Label>
+                    <Input
+                      id="apiKey"
+                      type="password"
+                      value={externalApiKey}
+                      onChange={(e) => setExternalApiKey(e.target.value)}
+                      placeholder="sk-..."
+                    />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="translate">翻译为中文</Label>
+                    <Switch
+                      id="translate"
+                      checked={translateToChinese}
+                      onCheckedChange={setTranslateToChinese}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    onClick={handleGenerateExternalSummary}
+                    disabled={externalSummaryMutation.isPending}
+                  >
+                    {externalSummaryMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        生成中...
+                      </>
+                    ) : (
+                      '生成总结'
+                    )}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
 
+          {/* External AI Summary */}
+          {externalSummary && (
+            <Card className="border-purple-300 bg-purple-50">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg text-purple-700">
+                  <Sparkles className="w-5 h-5" />
+                  外部AI高级总结
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {externalSummary}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+          
           {/* AI Analysis */}
           {article.aiAnalysis && (
             <Card className="border-accent/20 bg-accent/5">

@@ -15,6 +15,13 @@
       "when": 1768206582799,
       "tag": "0001_concerned_harpoon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1768208754146,
+      "tag": "0002_true_rocket_racer",
+      "breakpoints": true
     }
   ]
 }
