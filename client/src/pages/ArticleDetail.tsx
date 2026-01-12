@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function ArticleDetail() {
   const params = useParams();
@@ -53,6 +54,7 @@ export default function ArticleDetail() {
   const [showExternalDialog, setShowExternalDialog] = useState(false);
   const [externalApiUrl, setExternalApiUrl] = useState('https://pmpjfbhq.cn-nb1.rainapp.top/v1');
   const [externalApiKey, setExternalApiKey] = useState('sk-qNbdjNke4CdwOBIqJj4O4RoAdoItV2OJGii8lLA6j6B8lDT1');
+  const [externalModel, setExternalModel] = useState('gemini-2.0-flash-exp');
   const [translateToChinese, setTranslateToChinese] = useState(true);
   
   const externalSummaryMutation = trpc.articles.generateExternalSummary.useMutation({
@@ -71,6 +73,7 @@ export default function ArticleDetail() {
       id: articleId,
       apiUrl: externalApiUrl,
       apiKey: externalApiKey,
+      model: externalModel,
       translateToChinese,
     });
   };
@@ -194,6 +197,24 @@ export default function ArticleDetail() {
                       onChange={(e) => setExternalApiKey(e.target.value)}
                       placeholder="sk-..."
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="model">模型选择</Label>
+                    <Select value={externalModel} onValueChange={setExternalModel}>
+                      <SelectTrigger id="model">
+                        <SelectValue placeholder="选择模型" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Experimental)</SelectItem>
+                        <SelectItem value="gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
+                        <SelectItem value="gemini-1.5-flash">Gemini 1.5 Flash</SelectItem>
+                        <SelectItem value="gpt-4o">GPT-4o</SelectItem>
+                        <SelectItem value="gpt-4o-mini">GPT-4o Mini</SelectItem>
+                        <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+                        <SelectItem value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</SelectItem>
+                        <SelectItem value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="flex items-center justify-between">
                     <Label htmlFor="translate">翻译为中文</Label>

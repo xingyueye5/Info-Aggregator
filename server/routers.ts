@@ -233,6 +233,7 @@ export const appRouter = router({
         id: z.number(),
         apiUrl: z.string().url(),
         apiKey: z.string(),
+        model: z.string().optional(),
         translateToChinese: z.boolean().default(true),
       }))
       .mutation(async ({ ctx, input }) => {
@@ -246,6 +247,7 @@ export const appRouter = router({
           {
             apiUrl: input.apiUrl,
             apiKey: input.apiKey,
+            model: input.model,
           },
           input.translateToChinese
         );

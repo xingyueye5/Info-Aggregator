@@ -202,8 +202,8 @@ function extractChildLinks(baseUrl: string, $: cheerio.CheerioAPI): string[] {
     if (links.length >= 20) break;
   }
   
-  // 限制数量并返回
-  return links.slice(0, 10);
+  // 限制数量并返回（最多5篇）
+  return links.slice(0, 5);
 }
 
 /**
