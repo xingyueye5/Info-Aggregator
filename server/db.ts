@@ -219,8 +219,15 @@ export async function getArticleById(id: number) {
 export async function updateArticle(id: number, data: Partial<InsertArticle>) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
-  
+
   return await db.update(articles).set(data).where(eq(articles.id, id));
+}
+
+export async function deleteArticle(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.delete(articles).where(eq(articles.id, id));
 }
 
 export async function checkArticleExists(contentHash: string) {

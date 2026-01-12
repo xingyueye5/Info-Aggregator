@@ -311,7 +311,10 @@ export async function crawlSource(sourceId: number): Promise<{
 
     // 根据来源类型选择解析器
     if (source.type === 'rss') {
-      articles = await parseRSSFeed(source.url);
+      const allArticles = await parseRSSFeed(source.url);
+      // 限制RSS文章数量，最多抓取5篇最新的
+      articles = allArticles.slice(0, 5);
+      console.log(`[Crawler] RSS feed found ${allArticles.length} articles, limiting to ${articles.length}`);
     } else if (source.type === 'wechat') {
       const result = await parseWechatArticle(source.url);
       articles = [{

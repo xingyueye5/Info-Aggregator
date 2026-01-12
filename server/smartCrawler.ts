@@ -153,6 +153,8 @@ function extractChildLinks(baseUrl: string, $: cheerio.CheerioAPI): string[] {
   const excludePatterns = [
     /\/(login|signin|signup|register|auth)/i,
     /\/(search|filter|sort|category|tag)/i,
+    /\/(page|pagination|next|prev|previous)/i,  // 排除分页链接
+    /[?&](page|p|pg)=/i,  // 排除URL参数中的分页
     /\/(about|contact|privacy|terms|help|faq)/i,
     /\/(comment|reply|share)/i,
     /\.(jpg|jpeg|png|gif|pdf|zip|mp3|mp4)$/i,
@@ -201,9 +203,9 @@ function extractChildLinks(baseUrl: string, $: cheerio.CheerioAPI): string[] {
     // 如果已经找到足够的链接，停止
     if (links.length >= 20) break;
   }
-  
-  // 限制数量并返回（最多5篇）
-  return links.slice(0, 5);
+
+  // 限制数量并返回（最多3篇，保证快速抓取）
+  return links.slice(0, 3);
 }
 
 /**
@@ -314,16 +316,40 @@ export async function smartCrawl(url: string): Promise<MultiArticleResult> {
     } else if (analysis.type === 'list' && analysis.childLinks && analysis.childLinks.length > 0) {
       // 提取子页面内容
       console.log(`[SmartCrawler] Found ${analysis.childLinks.length} child links, extracting...`);
-      
-      for (const childUrl of analysis.childLinks) {
-        const article = await extractArticleContent(childUrl);
-        if (article) {
-          articles.push(article);
-          console.log(`[SmartCrawler] Extracted: ${article.title}`);
+
+      // 限制抓取数量，确保至少尝试获取1篇
+      const maxArticles = Math.min(analysis.childLinks.length, 3);
+
+      for (let i = 0; i < maxArticles; i++) {
+        const childUrl = analysis.childLinks[i];
+        try {
+          const article = await extractArticleContent(childUrl);
+          if (article) {
+            articles.push(article);
+            console.log(`[SmartCrawler] Extracted: ${article.title}`);
+
+            // 如果已经成功抓取到2篇，可以提前结束
+            if (articles.length >= 2) {
+              console.log(`[SmartCrawler] Successfully extracted ${articles.length} articles, stopping early`);
+              break;
+            }
+          }
+        } catch (error) {
+          console.error(`[SmartCrawler] Failed to extract ${childUrl}:`, error);
+          // 继续尝试下一个链接
         }
-        
+
         // 避免过快请求
         await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+
+      // 如果一篇都没抓到，尝试作为单篇文章处理
+      if (articles.length === 0) {
+        console.log(`[SmartCrawler] No articles extracted from child links, trying main page as article`);
+        const article = await extractArticleContent(url);
+        if (article) {
+          articles.push(article);
+        }
       }
     } else {
       // 未知类型，尝试作为文章处理

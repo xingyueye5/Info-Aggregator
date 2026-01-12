@@ -1,6 +1,7 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { trpc } from "@/lib/trpc";
-import { Heart, Loader2 } from "lucide-react";
+import { ArrowLeft, Heart, Loader2 } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Favorites() {
@@ -27,9 +28,16 @@ export default function Favorites() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container py-8 space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">我的收藏</h1>
-          <p className="text-muted-foreground mt-1">你收藏的精彩文章</p>
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">我的收藏</h1>
+            <p className="text-muted-foreground mt-1">你收藏的精彩文章</p>
+          </div>
         </div>
 
         {articles && articles.length > 0 ? (

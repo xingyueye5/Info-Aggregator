@@ -4,9 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Save } from "lucide-react";
+import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Link } from "wouter";
 
 export default function Settings() {
   const { data: settings, isLoading } = trpc.settings.get.useQuery();
@@ -57,9 +58,17 @@ export default function Settings() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container py-8 space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold">系统设置</h1>
-          <p className="text-muted-foreground mt-1">配置你的个性化选项</p>
+        {/* Header with back button */}
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">系统设置</h1>
+            <p className="text-muted-foreground mt-1">配置你的个性化选项</p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="max-w-2xl space-y-6">

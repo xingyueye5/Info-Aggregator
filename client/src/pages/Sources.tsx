@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
-import { Loader2, Plus, RefreshCw, Settings, Trash2 } from "lucide-react";
+import { ArrowLeft, Loader2, Plus, RefreshCw, Settings, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Link } from "wouter";
 
 export default function Sources() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -98,9 +99,16 @@ export default function Sources() {
       <div className="container py-8 space-y-8">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold">信息源管理</h1>
-            <p className="text-muted-foreground mt-1">管理你的内容来源</p>
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/">
+                <ArrowLeft className="w-5 h-5" />
+              </Link>
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold">信息源管理</h1>
+              <p className="text-muted-foreground mt-1">管理你的内容来源</p>
+            </div>
           </div>
           <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
             <DialogTrigger asChild>

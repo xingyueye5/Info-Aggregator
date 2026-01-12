@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, Download, ExternalLink, Heart, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, Download, ExternalLink, Heart, Loader2, Sparkles, Trash2 } from "lucide-react";
 import { useParams, useLocation } from "wouter";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -36,6 +36,16 @@ export default function ArticleDetail() {
     },
   });
 
+  const deleteMutation = trpc.articles.delete.useMutation({
+    onSuccess: () => {
+      toast.success('文章已删除');
+      setLocation('/articles');
+    },
+    onError: (error) => {
+      toast.error(`删除失败: ${error.message}`);
+    },
+  });
+
   const exportMutation = trpc.articles.export.useMutation({
     onSuccess: (data) => {
       const blob = new Blob([data.content], { type: 'text/plain;charset=utf-8' });
@@ -54,7 +64,7 @@ export default function ArticleDetail() {
   const [showExternalDialog, setShowExternalDialog] = useState(false);
   const [externalApiUrl, setExternalApiUrl] = useState('https://pmpjfbhq.cn-nb1.rainapp.top/v1');
   const [externalApiKey, setExternalApiKey] = useState('sk-qNbdjNke4CdwOBIqJj4O4RoAdoItV2OJGii8lLA6j6B8lDT1');
-  const [externalModel, setExternalModel] = useState('gemini-2.0-flash-exp');
+  const [externalModel, setExternalModel] = useState('gemini-2.5-pro');
   const [translateToChinese, setTranslateToChinese] = useState(true);
   
   const externalSummaryMutation = trpc.articles.generateExternalSummary.useMutation({
@@ -84,6 +94,12 @@ export default function ArticleDetail() {
 
   const handleToggleFavorite = () => {
     toggleFavoriteMutation.mutate({ id: articleId });
+  };
+
+  const handleDelete = () => {
+    if (confirm('确定要删除这篇文章吗？此操作无法撤销。')) {
+      deleteMutation.mutate({ id: articleId });
+    }
   };
 
   const handleExport = (format: 'markdown' | 'txt') => {
@@ -166,7 +182,17 @@ export default function ArticleDetail() {
               <Download className="w-4 h-4 mr-2" />
               导出TXT
             </Button>
-            
+
+            <Button
+              variant="outline"
+              className="border-red-300 text-red-700 hover:bg-red-50"
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              删除文章
+            </Button>
+
             <Dialog open={showExternalDialog} onOpenChange={setShowExternalDialog}>
               <DialogTrigger asChild>
                 <Button variant="outline" className="border-purple-300 text-purple-700 hover:bg-purple-50">
@@ -205,14 +231,9 @@ export default function ArticleDetail() {
                         <SelectValue placeholder="选择模型" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="gemini-2.0-flash-exp">Gemini 2.0 Flash (Experimental)</SelectItem>
-                        <SelectItem value="gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
-                        <SelectItem value="gemini-1.5-flash">Gemini 1.5 Flash</SelectItem>
-                        <SelectItem value="gpt-4o">GPT-4o</SelectItem>
-                        <SelectItem value="gpt-4o-mini">GPT-4o Mini</SelectItem>
-                        <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
-                        <SelectItem value="claude-3-5-sonnet-20241022">Claude 3.5 Sonnet</SelectItem>
-                        <SelectItem value="claude-3-5-haiku-20241022">Claude 3.5 Haiku</SelectItem>
+                        <SelectItem value="gemini-2.5-pro">Gemini 2.5 Pro</SelectItem>
+                        <SelectItem value="claude-haiku-4-5-20251001">Claude Haiku 4.5</SelectItem>
+                        <SelectItem value="gpt-5-codex">GPT-5 Codex</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

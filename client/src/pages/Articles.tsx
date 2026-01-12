@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { trpc } from "@/lib/trpc";
-import { BookOpen, Heart, Loader2, Search } from "lucide-react";
+import { ArrowLeft, BookOpen, Heart, Loader2, Search } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 
@@ -39,9 +39,16 @@ export default function Articles() {
     <div className="min-h-screen bg-background">
       <div className="container py-8 space-y-6">
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold">文章列表</h1>
-          <p className="text-muted-foreground mt-1">浏览和管理你的内容</p>
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/">
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">文章列表</h1>
+            <p className="text-muted-foreground mt-1">浏览和管理你的内容</p>
+          </div>
         </div>
 
         {/* Filters */}

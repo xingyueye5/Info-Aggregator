@@ -12,6 +12,7 @@ import {
   getArticlesByUserId,
   getArticleById,
   updateArticle,
+  deleteArticle,
   getTodayArticles,
   getArticleStats,
   getAiAnalysisByArticleId,
@@ -223,11 +224,23 @@ export const appRouter = router({
         if (!article || article.userId !== ctx.user.id) {
           throw new Error('Article not found or unauthorized');
         }
-        
+
         await updateArticle(input.id, { isFavorite: !article.isFavorite });
         return { success: true, isFavorite: !article.isFavorite };
       }),
-    
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        const article = await getArticleById(input.id);
+        if (!article || article.userId !== ctx.user.id) {
+          throw new Error('Article not found or unauthorized');
+        }
+
+        await deleteArticle(input.id);
+        return { success: true };
+      }),
+
     generateExternalSummary: protectedProcedure
       .input(z.object({
         id: z.number(),
